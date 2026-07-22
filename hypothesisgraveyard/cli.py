@@ -5,11 +5,19 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import sys
+
 import typer
 from rich.console import Console
 from rich.table import Table
 
-from hypothesisgraveyard.scholar import ScholarClient
+# Windows consoles often default to cp1252, which mangles the arrows and other
+# non-ASCII characters in the output; force UTF-8 where the stream supports it.
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+
+from hypothesisgraveyard.scholar import ScholarClient, ScholarError
 from hypothesisgraveyard.hypothesis import HypothesisExtractor
 from hypothesisgraveyard.scorer import NeglectScorer
 from hypothesisgraveyard.visualiser import render_html
@@ -29,25 +37,34 @@ def dig(
     html_out:  str = typer.Option(None, "--html",       help="Save HTML graveyard to file"),
     no_html:   bool = typer.Option(False, "--no-html",  help="Skip HTML output"),
     threshold: float = typer.Option(0.7, "--threshold", help="Neglect score to be 'buried'"),
+    demo:      bool = typer.Option(False, "--demo",
+                                   help="Use bundled sample data (no network or API key)"),
 ):
     """Search a topic and generate a graveyard of neglected hypotheses."""
-    client    = ScholarClient()
+    client    = ScholarClient(demo=demo)
     extractor = HypothesisExtractor()
     scorer    = NeglectScorer(buried_threshold=threshold)
 
+    if demo:
+        console.print("[dim]Demo mode: using bundled sample data, not live results.[/dim]")
     console.print(f"[blue]Searching Semantic Scholar for:[/blue] {topic}")
-    papers = client.search_topic(topic, limit=limit, year_start=from_year, year_end=to_year)
-    console.print(f"Found {len(papers)} papers with abstracts")
+    try:
+        papers = client.search_topic(topic, limit=limit, year_start=from_year, year_end=to_year)
+        console.print(f"Found {len(papers)} papers with abstracts")
 
-    entries = []
-    for i, paper in enumerate(papers):
-        hyps = extractor.extract(paper.abstract)
-        if not hyps:
-            continue
-        console.print(f"[{i+1}/{len(papers)}] {paper.title[:60]}...")
-        ctxs  = client.fetch_citations(paper.paper_id)
-        entry = scorer.score(paper, hyps, ctxs)
-        entries.append(entry)
+        entries = []
+        for i, paper in enumerate(papers):
+            hyps = extractor.extract(paper.abstract)
+            if not hyps:
+                continue
+            console.print(f"[{i+1}/{len(papers)}] {paper.title[:60]}...")
+            ctxs  = client.fetch_citations(paper.paper_id)
+            entry = scorer.score(paper, hyps, ctxs)
+            entries.append(entry)
+    except ScholarError as e:
+        console.print(f"[red]Semantic Scholar is unavailable:[/red] {e}")
+        console.print("[yellow]Tip:[/yellow] rerun with [bold]--demo[/bold] to try the tool offline.")
+        raise typer.Exit(code=1)
 
     if not entries:
         console.print("[yellow]No papers with hypothesis language found.[/yellow]")

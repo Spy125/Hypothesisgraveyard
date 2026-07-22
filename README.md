@@ -23,6 +23,9 @@ The motivation: science produces many more hypotheses than it can test, and cita
 ```bash
 pip install -r requirements.txt
 
+# Try it offline with bundled sample data (no network or API key needed)
+python -m hypothesisgraveyard.cli dig "anything" --demo --no-html
+
 # Search a topic and generate a graveyard
 python -m hypothesisgraveyard.cli dig "gut-brain axis"
 
@@ -35,6 +38,13 @@ python -m hypothesisgraveyard.cli dig "quantum cognition" --top 10 --json result
 # Test hypothesis extraction on a single abstract
 python -m hypothesisgraveyard.cli extract "We propose that gut bacteria modulate dopamine synthesis."
 ```
+
+### Live data and rate limits
+
+Live queries use the Semantic Scholar API, whose free tier throttles
+unauthenticated traffic heavily. For live use, request a free API key from
+Semantic Scholar and set it in the `SEMANTIC_SCHOLAR_API_KEY` environment
+variable. Without a key, use `--demo` to run against the bundled sample data.
 
 ---
 
