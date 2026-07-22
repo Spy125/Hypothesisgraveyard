@@ -13,11 +13,12 @@ class HypothesisSentence:
     signal: str         # which signal group matched
 
 
-# Five signal groups - each signals increasing uncertainty or novelty
-# Higher weight = stronger hypothesis signal
+# Five signal groups. The weight is how strongly the phrasing indicates a
+# hypothesis: an explicit proposal is the clearest, followed by hedged claims
+# and novelty claims, then vague possibility and future-work language.
 
 _PROPOSE = (re.compile(
-    r'\b(we propose|we hypothes[ei]s[e]?|we conjecture|we theorize|'
+    r'\b(we propose|we hypothesi[sz]e[sd]?|we conjecture|we theori[sz]e|'
     r'we postulate|we argue that|our hypothesis|the hypothesis that)\b',
     re.I), 1.0)
 
@@ -42,10 +43,11 @@ _NOVEL = (re.compile(
     r'\b(novel (hypothesis|theory|model|framework)|'
     r'first (to show|to demonstrate|evidence)|'
     r'to our knowledge|hitherto unknown)\b',
-    re.I), 0.5)
+    re.I), 0.9)
 
-_SIGNALS = [("propose", _PROPOSE), ("hedge", _HEDGE), ("possibility", _POSSIBILITY),
-            ("future", _FUTURE), ("novel", _NOVEL)]
+# Ordered strongest signal first.
+_SIGNALS = [("propose", _PROPOSE), ("hedge", _HEDGE), ("novel", _NOVEL),
+            ("possibility", _POSSIBILITY), ("future", _FUTURE)]
 
 # Abbreviations that should not be treated as sentence endings
 _ABBREV = re.compile(r'\b(et al|vs|i\.e|e\.g|Fig|vol|pp|Dr|Prof|no|approx)\.$', re.I)

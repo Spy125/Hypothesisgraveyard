@@ -51,13 +51,18 @@ class NeglectScorer:
     def score(self, paper: Paper, hypotheses: list[HypothesisSentence],
               contexts: list[CitationContext]) -> GraveyardEntry:
         """Score one paper."""
-        total     = paper.citation_count or len(contexts)
-        engaging  = sum(1 for c in contexts if _is_engaging(c))
+        # Neglect is measured over the citation contexts actually retrieved so
+        # that numerator and denominator describe the same population. Using
+        # paper.citation_count as the denominator would divide a sampled count
+        # of engaging contexts by the full citation total, which understates
+        # engagement whenever only a subset of contexts was fetched.
+        examined = len(contexts)
+        engaging = sum(1 for c in contexts if _is_engaging(c))
 
-        if total == 0:
+        if examined == 0:
             neglect = 1.0
         else:
-            neglect = 1.0 - (engaging / total)
+            neglect = 1.0 - (engaging / examined)
 
         # pick the highest-confidence hypothesis to display
         if hypotheses:
