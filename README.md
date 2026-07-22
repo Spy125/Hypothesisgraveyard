@@ -38,6 +38,20 @@ python -m hypothesisgraveyard.cli extract "We propose that gut bacteria modulate
 
 ---
 
+## Testing
+
+Install the dependencies and run the suite:
+
+```bash
+python -m venv .venv
+.venv/Scripts/pip install -r requirements.txt pytest   # Linux/macOS: .venv/bin/pip
+.venv/Scripts/python -m pytest -v
+```
+
+Exercise the CLI directly with `python -m hypothesisgraveyard.cli --help`.
+
+---
+
 ## Project structure
 
 ```
