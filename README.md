@@ -12,7 +12,7 @@ The motivation: science produces many more hypotheses than it can test, and cita
 2. Abstracts are scanned for hypothesis language: proposal markers ("we propose", "we hypothesise"), hedging ("this suggests", "may indicate"), possibility ("could be", "it is possible that"), and future predictions
 3. Citation contexts are retrieved for each paper
 4. A citation is classed as "engaging" if it confirms, challenges, or extends the work - not just cites it as background
-5. A neglect score is computed per paper: `1 - (engaging citations / total citations)`
+5. A neglect score is computed per paper: `1 - (engaging citations / citation contexts examined)`
 6. Papers with neglect score >= 0.7 are marked as buried
 7. Results are rendered as a self-contained HTML graveyard page
 
