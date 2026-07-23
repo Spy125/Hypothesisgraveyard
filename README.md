@@ -8,7 +8,7 @@ The motivation: science produces many more hypotheses than it can test, and cita
 
 ## How it works
 
-1. Papers matching the query are fetched from Semantic Scholar (free, no API key needed)
+1. Papers matching the query are fetched from Semantic Scholar (an API key is optional but recommended; see below)
 2. Abstracts are scanned for hypothesis language: proposal markers ("we propose", "we hypothesise"), hedging ("this suggests", "may indicate"), possibility ("could be", "it is possible that"), and future predictions
 3. Citation contexts are retrieved for each paper
 4. A citation is classed as "engaging" if it confirms, challenges, or extends the work - not just cites it as background
@@ -68,6 +68,7 @@ Exercise the CLI directly with `python -m hypothesisgraveyard.cli --help`.
 hypothesisgraveyard/
 ├── hypothesisgraveyard/
 │   ├── scholar.py      # Semantic Scholar search and citation fetch
+│   ├── demo_data.py    # bundled sample data for --demo
 │   ├── hypothesis.py   # hypothesis sentence extraction
 │   ├── scorer.py       # neglect score computation
 │   ├── visualiser.py   # standalone HTML output
@@ -83,4 +84,4 @@ hypothesisgraveyard/
 
 Python 3.10, Requests, Typer, Rich
 
-No API key required.
+An API key is optional but recommended for live use; `--demo` needs neither key nor network.
