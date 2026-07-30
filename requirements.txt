@@ -1,4 +1,4 @@
-requests==2.31.0
+requests>=2.32.2
 typer>=0.15
 rich==13.7.1
 
