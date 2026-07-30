@@ -53,8 +53,8 @@ class ScholarClient:
 
     An API key is optional but strongly recommended: unauthenticated requests
     share a very low rate limit and are often throttled. Provide one via the
-    ``api_key`` argument or the ``SEMANTIC_SCHOLAR_API_KEY`` environment variable.
-    Set ``demo=True`` to serve bundled sample data instead of calling the API.
+    api_key argument or the SEMANTIC_SCHOLAR_API_KEY environment variable.
+    Set demo=True to serve bundled sample data instead of calling the API.
     """
 
     def __init__(self, timeout: int = 20, api_key: str | None = None,
