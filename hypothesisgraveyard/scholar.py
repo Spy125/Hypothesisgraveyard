@@ -9,6 +9,8 @@ from dataclasses import dataclass, field
 
 import requests
 
+from . import demo_data
+
 log = logging.getLogger(__name__)
 
 BASE_URL   = "https://api.semanticscholar.org/graph/v1"
@@ -70,9 +72,6 @@ class ScholarClient:
     def search_topic(self, query: str, limit: int = 50,
                      year_start: int = None, year_end: int = None) -> list[Paper]:
         """Search for papers matching query and return Paper objects."""
-        if self.demo:
-            from .demo_data import demo_search
-            return demo_search(query, limit)
         params = {
             "query": query,
             "limit": min(limit, 100),
@@ -100,9 +99,6 @@ class ScholarClient:
 
     def fetch_citations(self, paper_id: str, limit: int = 50) -> list[CitationContext]:
         """Fetch citation contexts for a paper - shows HOW citing papers reference it."""
-        if self.demo:
-            from .demo_data import demo_citations
-            return demo_citations(paper_id, limit)
         params = {
             "limit": min(limit, 100),
             "fields": "title,year,contexts,intents",
@@ -126,6 +122,9 @@ class ScholarClient:
         Raises ScholarError if the API keeps returning 429 or cannot be reached,
         rather than returning an empty result that would look like "no papers".
         """
+        if self.demo:
+            return _demo_response(url, params or {})
+
         for attempt in range(MAX_RETRY):
             time.sleep(RATE_SLEEP)
             try:
@@ -157,3 +156,19 @@ class ScholarClient:
             "SEMANTIC_SCHOLAR_API_KEY environment variable, or run with --demo "
             "to use bundled sample data."
         )
+
+
+def _demo_response(url: str, params: dict) -> dict:
+    """Serve bundled sample data in the shape the API would return.
+
+    Interposing at the request boundary means demo runs go through exactly the
+    same parsing code as live ones, so the sample path cannot quietly drift
+    away from the real one.
+    """
+    path = url.rsplit("/graph/v1/", 1)[-1]
+    if path.startswith("paper/search"):
+        return demo_data.search_response(int(params.get("limit", 50)))
+    if path.startswith("paper/") and path.endswith("/citations"):
+        return demo_data.citations_response(path.split("/")[1],
+                                            int(params.get("limit", 50)))
+    return {"data": []}
