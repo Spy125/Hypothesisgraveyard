@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from html import escape as _escape
 from pathlib import Path
 
 from hypothesisgraveyard.scorer import GraveyardEntry
@@ -31,16 +32,22 @@ h1   { color:#58a6ff; border-bottom:1px solid #30363d; padding-bottom:.5rem; }
 
 
 def _gravestone_html(entry: GraveyardEntry) -> str:
+    """Render one gravestone.
+
+    Titles, author names and hypothesis text all originate from the Semantic
+    Scholar API, so they are escaped rather than interpolated raw: an abstract
+    containing markup would otherwise be parsed as part of the page.
+    """
     css_class = "buried" if entry.is_buried else "survived-entry"
     bar_width  = int(entry.neglect_score * 120)
-    hyp_html   = (f'<div class="hypothesis">{entry.strongest_hypothesis}</div>'
+    hyp_html   = (f'<div class="hypothesis">{_escape(entry.strongest_hypothesis)}</div>'
                   if entry.strongest_hypothesis else "")
 
     return f"""
 <div class="stone {css_class}">
-  <div class="stone-title">{entry.paper.title}</div>
+  <div class="stone-title">{_escape(entry.paper.title)}</div>
   <div class="stone-meta">
-    {entry.author_string} &middot; {entry.paper.year} &middot;
+    {_escape(entry.author_string)} &middot; {entry.paper.year} &middot;
     {entry.paper.citation_count} citations &middot;
     {entry.engaging_count} engaging
   </div>
@@ -65,13 +72,13 @@ def render_html(entries: list[GraveyardEntry], topic: str,
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>HypothesisGraveyard - {topic}</title>
+  <title>HypothesisGraveyard - {_escape(topic)}</title>
   <style>{_CSS}</style>
 </head>
 <body>
   <h1>HypothesisGraveyard</h1>
   <p class="stats">
-    Topic: <strong>{topic}</strong> &mdash;
+    Topic: <strong>{_escape(topic)}</strong> &mdash;
     {len(entries)} papers analysed &mdash;
     Survival rate: <strong>{survival_rate:.1%}</strong>
   </p>
